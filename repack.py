@@ -41,7 +41,6 @@ while (line):
 		orgfile = csv[pos0:pos1]
 		org = arr[2]
 		# 翻译中的原文应同原文中的原文相等
-
 		if orgfile != org:
 			print ("警告: 翻译中的原文同原文中的原文不相等")
 			print ("\t翻译: %s" % (org.encode('utf-8')))
