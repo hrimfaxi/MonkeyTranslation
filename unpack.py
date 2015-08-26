@@ -11,9 +11,9 @@ import codecs
 # 导出脚本
 
 # 原文/CSV格式
-fin = codecs.open('1.txt','r',encoding='utf-8');
+fin = codecs.open(sys.argv[1],'r',encoding='utf-8');
 # 输出CSV文件 (转化为人类可读形式)
-fout = codecs.open('out.csv', 'w', encoding='utf-8');
+fout = codecs.open(sys.argv[2], 'w', encoding='utf-8');
 # 得到整个原文
 origcsv = fin.read();
 lastWide = False;
