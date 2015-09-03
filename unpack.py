@@ -26,8 +26,8 @@ i = 0;
 # 保留的字符串列表
 reservedStrList = [
 	'<%=name%>',
-	'{CR}',
-	'{LF}',
+#	'{CR}',
+#	'{LF}',
 ]
 
 while(i < len(origcsv)):
