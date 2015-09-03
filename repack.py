@@ -71,7 +71,7 @@ def get_fuzzy_index_v2(org):
 	fixup_startpos = compare_csv.find(org, fixup_startpos)
 	if fixup_startpos != -1:
 		tlen = len(org)
-		print ("%d: 修复: %d, %d %s (lastpos %d)" % (cnt, fixup_startpos, fixup_startpos+tlen, org.encode('utf-8'), lastpos))
+		#print ("%d: 修复: %d, %d %s (lastpos %d)" % (cnt, fixup_startpos, fixup_startpos+tlen, org.encode('utf-8'), lastpos))
 		return fixup_startpos, fixup_startpos + tlen
 
 	return -1, -1
@@ -100,8 +100,8 @@ while (line):
 				assert(False)
 		orgfile = csv[pos0:pos1]
 		# 翻译中的原文应同原文中的原文相等
-		if orgfile != org:
-			print ("警告: 翻译中的原文同原文中的原文不相等")
+		if foreach_replace(orgfile) != foreach_replace(org):
+			print ("警告 %d行: 翻译中的原文同原文中的原文不相等" % (cnt+1))
 			print ("\t翻译: %s" % (org.encode('utf-8')))
 			print ("\t原文: %s" % (orgfile.encode('utf-8')))
 		# 翻译后的文本
