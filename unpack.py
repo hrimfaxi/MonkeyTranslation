@@ -23,8 +23,12 @@ wdend = 0;
 
 i = 0;
 
-# 保留的字符串
-reservedStr = '<%=name%>';
+# 保留的字符串列表
+reservedStrList = [
+	'<%=name%>',
+#	'{CR}',
+#	'{LF}',
+]
 
 while(i < len(origcsv)):
 	ch = origcsv[i];
@@ -44,14 +48,20 @@ while(i < len(origcsv)):
 		# 上一个是汉字？
 		if (lastWide) :
 			# 是保留字？
-			if (origcsv[i:i + len(reservedStr)] == reservedStr) :
-				# 加入保留字长度到偏移量
-				i += len(reservedStr);
-				# 加入保留字到wdstr
-				wdstr += reservedStr;
-				# 继续
-				continue;
-				
+			foundReservedStr = False
+			for reservedStr in reservedStrList:
+				if origcsv[i:i + len(reservedStr)] == reservedStr:
+					# 加入保留字长度到偏移量
+					i += len(reservedStr);
+					# 加入保留字到wdstr
+					wdstr += reservedStr;
+					# 继续
+					foundReservedStr = True
+					break
+
+			if foundReservedStr:
+				continue
+
 			# 记录结束字
 			wdend = i;
 			# 输出格式: 开始偏移，结束偏移，字符串
