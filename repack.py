@@ -8,8 +8,6 @@ import glob
 import struct
 import codecs
 
-USE_FUZZY_SEARCH = True
-
 if len(sys.argv) < 3:
 	print ("Usage: <原文.csv> <翻译.csv>")
 	sys.exit(1)
@@ -56,6 +54,7 @@ g_wordlist = [
 	[ u'穗',u'穂' ],
 	[ u'學',u'学' ],
 	[ u'獸',u'獣' ],
+	[ u'與',u'与' ],
 ]
 
 def foreach_replace(string):
@@ -98,18 +97,17 @@ while (line):
 		org = arr[2]
 		assert(len(org))
 
-		if USE_FUZZY_SEARCH:
-			# 采用模糊查找
-			pos0, pos1 = get_fuzzy_index_v2(org)
-			if pos0 == -1:
-				print ("%d, %d, %s - 未找到，必须人工干预！ lastpos: %d" % (savedpos0, savedpos1, org.encode('utf-8'), lastpos))
-				assert(False)
 		orgfile = csv[pos0:pos1]
 		# 翻译中的原文应同原文中的原文相等
 		if foreach_replace(orgfile) != foreach_replace(org):
 			print ("警告 %d行: 翻译中的原文同原文中的原文不相等" % (cnt+1))
 			print ("\t翻译: %s" % (org.encode('utf-8')))
 			print ("\t原文: %s" % (orgfile.encode('utf-8')))
+			# 采用模糊查找
+			pos0, pos1 = get_fuzzy_index_v2(org)
+			if pos0 == -1:
+				print ("%d, %d, %s - 未找到，必须人工干预！ lastpos: %d" % (savedpos0, savedpos1, org.encode('utf-8'), lastpos))
+				assert(False)
 		# 翻译后的文本
 		txt = (arr[3]);
 		# 写翻译位置之前的文本
