@@ -20,6 +20,7 @@ def csv_to_execl(csvfiles):
                     sheet.write(rowi, coli, value)
 
     workbook.save('output.xlsx')
+    print ("output.xlsx saved")
 
 def main():
     csv_to_execl(sys.argv[1:])

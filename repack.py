@@ -8,6 +8,8 @@ import glob
 import struct
 import codecs
 
+USE_FUZZY_SEARCH = True
+
 if len(sys.argv) < 3:
 	print ("Usage: <原文.csv> <翻译.csv>")
 	sys.exit(1)
@@ -69,12 +71,18 @@ def get_fuzzy_index_v2(org):
 	fixup_startpos = compare_csv.find(org, fixup_startpos)
 	if fixup_startpos != -1:
 		tlen = len(org)
-		print ("%d: 修复: %d, %d %s (lastpos %d)" % (cnt, fixup_startpos, fixup_startpos+tlen, org.encode('utf-8'), lastpos))
+		#print ("%d: 修复: %d, %d %s (lastpos %d)" % (cnt, fixup_startpos, fixup_startpos+tlen, org.encode('utf-8'), lastpos))
 		return fixup_startpos, fixup_startpos + tlen
 
 	return -1, -1
 
 while (line):
+	# 注释？
+	if line[0] == '#':
+		cnt += 1;
+		# 读下一行
+		line = fincsv.readline();
+		continue
 	# 使用逗号分割
 	arr = line.strip().split(',');
 	if len(arr) == 4:
@@ -90,17 +98,18 @@ while (line):
 		org = arr[2]
 		assert(len(org))
 
-		orgfile = csv[pos0:pos1]
-		# 翻译中的原文应同原文中的原文相等
-		if orgfile != org:
-			print ("警告: 翻译中的原文同原文中的原文不相等")
-			print ("\t翻译: %s" % (org.encode('utf-8')))
-			print ("\t原文: %s" % (orgfile.encode('utf-8')))
+		if USE_FUZZY_SEARCH:
 			# 采用模糊查找
 			pos0, pos1 = get_fuzzy_index_v2(org)
 			if pos0 == -1:
-			    print ("%d, %d, %s - 未找到，必须人工干预！ lastpos: %d" % (savedpos0, savedpos1, org.encode('utf-8'), lastpos))
-			    assert(False)
+				print ("%d, %d, %s - 未找到，必须人工干预！ lastpos: %d" % (savedpos0, savedpos1, org.encode('utf-8'), lastpos))
+				assert(False)
+		orgfile = csv[pos0:pos1]
+		# 翻译中的原文应同原文中的原文相等
+		if foreach_replace(orgfile) != foreach_replace(org):
+			print ("警告 %d行: 翻译中的原文同原文中的原文不相等" % (cnt+1))
+			print ("\t翻译: %s" % (org.encode('utf-8')))
+			print ("\t原文: %s" % (orgfile.encode('utf-8')))
 		# 翻译后的文本
 		txt = (arr[3]);
 		# 写翻译位置之前的文本
