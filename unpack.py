@@ -10,6 +10,10 @@ import codecs
 
 # 导出脚本
 
+if len(sys.argv) < 3:
+    print ("Usage: %s <原文.csv> <输出文件.csv>" % (sys.argv[0]))
+    sys.exit(1)
+
 # 原文/CSV格式
 fin = codecs.open(sys.argv[1],'r',encoding='utf-8');
 # 输出CSV文件 (转化为人类可读形式)
