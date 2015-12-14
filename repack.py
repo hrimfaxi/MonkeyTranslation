@@ -55,6 +55,7 @@ g_wordlist = [
 	[ u'學',u'学' ],
 	[ u'獸',u'獣' ],
 	[ u'與',u'与' ],
+	[ u'―', u'—' ],
 ]
 
 def foreach_replace(string):
