@@ -1,5 +1,5 @@
 #!/bin/sh
 
-echo Creating $D
 D=$(date "+%y%m%d")
+echo Creating $D
 mkdir $D
