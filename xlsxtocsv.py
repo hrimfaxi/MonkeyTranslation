@@ -20,6 +20,7 @@ def csv_from_execl(xlsxfn):
                 v = sh.row_values(rownum)
                 if isinstance(v[0], (float, )):
                     v[0] = int(v[0])
+                if isinstance(v[1], (float, )):
                     v[1] = int(v[1])
                 wr.writerow(v)
         print (ofn + u" dumped.")
