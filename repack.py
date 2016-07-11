@@ -120,7 +120,7 @@ while (line):
 		# 写翻译位置之前的文本
 		fout.write(csv[lastpos:pos0] + txt);
 		# 不允许发生乱序
-		assert(lastpos < pos0)
+		assert(lastpos <= pos0)
 		# 更新最后位置
 		lastpos = pos1;
 	else:
