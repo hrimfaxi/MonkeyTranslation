@@ -91,7 +91,7 @@ while (line):
 		continue
 	# 使用逗号分割
 	arr = line.strip().split(',');
-	if len(arr) == 4:
+	if len(arr) == 4 or len(arr) == 5:
 		# 开始位置
 		pos0 = int(arr[0]);
 		# 结束位置
