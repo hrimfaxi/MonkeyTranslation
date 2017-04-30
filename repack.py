@@ -117,6 +117,13 @@ while (line):
 				assert(False)
 		# 翻译后的文本
 		txt = (arr[3]);
+
+		if len(txt) == 0:
+			cnt += 1;
+			# 读下一行
+			line = fincsv.readline();
+			continue
+
 		# 写翻译位置之前的文本
 		fout.write(csv[lastpos:pos0] + txt);
 		# 不允许发生乱序
