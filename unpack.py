@@ -7,17 +7,24 @@ import ftplib
 import glob
 import struct
 import codecs
+import argparse
+import re
 
 # 导出脚本
 
-if len(sys.argv) < 3:
-    print ("Usage: %s <原文.csv> <输出文件.csv>" % (sys.argv[0]))
-    sys.exit(1)
+parser = argparse.ArgumentParser(description='Unpack Monkey tranlsation into csv')
+parser.add_argument('-x', '--xml', action='store_true', help='xml mode, no translation on xml directive')
+parser.add_argument('-s', '--strip', action='store_true', help='strip all empty lines')
+parser.add_argument('input', nargs=1, help='原文.csv')
+parser.add_argument('output', nargs=1, help='输出文件.csv')
+
+args = parser.parse_args()
+#print(vars(args))
 
 # 原文/CSV格式
-fin = codecs.open(sys.argv[1],'r',encoding='utf-8');
+fin = codecs.open(args.input[0],'r',encoding='utf-8');
 # 输出CSV文件 (转化为人类可读形式)
-fout = codecs.open(sys.argv[2], 'w', encoding='utf-8');
+fout = codecs.open(args.output[0], 'w', encoding='utf-8');
 # 得到整个原文
 origcsv = fin.read();
 lastWide = False;
@@ -34,8 +41,22 @@ reservedStrList = [
 #	'{LF}',
 ]
 
+inXML = False
+
 while(i < len(origcsv)):
 	ch = origcsv[i];
+
+	if args.xml:
+		if ch == '<':
+			inXML = True
+		elif ch == '>':
+			inXML = False
+
+		if inXML:
+			# 下一个字符
+			i += 1;
+			continue
+
 	# 是汉字？
 	isWide = ord(ch) > 127;
 	if (isWide) :
@@ -65,6 +86,14 @@ while(i < len(origcsv)):
 
 			if foundReservedStr:
 				continue
+
+			if args.strip:
+				if re.match('^\s+$', wdstr):
+					i += 1
+					continue
+				while re.match('\s', wdstr[0]):
+					wdstr = wdstr[1:]
+					wdstart += 1
 
 			# 记录结束字
 			wdend = i;
