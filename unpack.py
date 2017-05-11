@@ -1,110 +1,96 @@
-#!/usr/bin/python
-# coding: utf-8
+#!/usr/bin/python3
 
-import sys
-import os
-import ftplib
-import glob
-import struct
-import codecs
-import argparse
-import re
+import argparse, re, csv
 
-# 导出脚本
+class TransEntry():
+	def __init__(self, begin, end, string):
+		self.begin = begin
+		self.end = end
+		self.string = string
 
-parser = argparse.ArgumentParser(description='Unpack Monkey tranlsation into csv')
-parser.add_argument('-x', '--xml', action='store_true', help='xml mode, no translation on xml directive')
-parser.add_argument('-s', '--strip', action='store_true', help='strip all empty lines')
-parser.add_argument('input', nargs=1, help='原文.csv')
-parser.add_argument('output', nargs=1, help='输出文件.csv')
+def isReservedWord(inp, pos):
+	return inp[pos:pos+3] == "<%="
 
-args = parser.parse_args()
-#print(vars(args))
-
-# 原文/CSV格式
-fin = codecs.open(args.input[0],'r',encoding='utf-8');
-# 输出CSV文件 (转化为人类可读形式)
-fout = codecs.open(args.output[0], 'w', encoding='utf-8');
-# 得到整个原文
-origcsv = fin.read();
-lastWide = False;
-wdstr = u'';
-wdstart = 0;
-wdend = 0;
-
-i = 0;
-
-# 保留的字符串列表
-reservedStrList = [
-	'<%=name%>',
-#	'{CR}',
-#	'{LF}',
+ranges = [
+	{"from": ord(u"\u3300"), "to": ord(u"\u33ff")},         # compatibility ideographs
+	{"from": ord(u"\ufe30"), "to": ord(u"\ufe4f")},         # compatibility ideographs
+	{"from": ord(u"\uf900"), "to": ord(u"\ufaff")},         # compatibility ideographs
+	{"from": ord(u"\U0002F800"), "to": ord(u"\U0002fa1f")}, # compatibility ideographs
+	{"from": ord(u"\u30a0"), "to": ord(u"\u30ff")},         # Japanese Kana
+	{"from": ord(u"\u2e80"), "to": ord(u"\u2eff")},         # cjk radicals supplement
+	{"from": ord(u"\u4e00"), "to": ord(u"\u9fff")},
+	{"from": ord(u"\u3400"), "to": ord(u"\u4dbf")},
+	{"from": ord(u"\U00020000"), "to": ord(u"\U0002a6df")},
+	{"from": ord(u"\U0002a700"), "to": ord(u"\U0002b73f")},
+	{"from": ord(u"\U0002b740"), "to": ord(u"\U0002b81f")},
+	{"from": ord(u"\U0002b820"), "to": ord(u"\U0002ceaf")}, # included as of Unicode 8.0
+	{"from": ord(u"\u3040"), "to": ord(u"\u309f")},		# 平假名
 ]
 
-inXML = False
+# 不包括标点符号
+def isCJK(char):
+	return any([range["from"] <= ord(char) <= range["to"] for range in ranges])
 
-while(i < len(origcsv)):
-	ch = origcsv[i];
+# 包括标点符号
+def isHanzi(ch):
+	return ord(ch) >= 0x80
 
-	if args.xml:
-		if ch == '<':
-			inXML = True
-		elif ch == '>':
-			inXML = False
+def main():
+	argparser = argparse.ArgumentParser('unpack')
+	argparser.add_argument('input')
+	argparser.add_argument('output')
+	args = argparser.parse_args()
 
-		if inXML:
-			# 下一个字符
-			i += 1;
-			continue
+	with open(args.input, "r", encoding='utf-8') as fi:
+		inp = fi.read()
 
-	# 是汉字？
-	isWide = ord(ch) > 127;
-	if (isWide) :
-		# 上一个不是汉字
-		if (not lastWide) :
-			# 记录字符串
-			wdstr = ch;
-			# 记录下偏移量
-			wdstart = i;
-		else :
-			wdstr += ch;
-	else:
-		# 不是汉字
-		# 上一个是汉字？
-		if (lastWide) :
-			# 是保留字？
-			foundReservedStr = False
-			for reservedStr in reservedStrList:
-				if origcsv[i:i + len(reservedStr)] == reservedStr:
-					# 加入保留字长度到偏移量
-					i += len(reservedStr);
-					# 加入保留字到wdstr
-					wdstr += reservedStr;
-					# 继续
-					foundReservedStr = True
-					break
+		curr = begin = end = 0
+		caught_hanzi = False
+		entries = []
+		string = ""
+		cjk = 0
 
-			if foundReservedStr:
-				continue
+		while curr < len(inp):
+			ch = inp[curr]
+			if isCJK(ch):
+				cjk += 1
+				# print(ch, end='')
 
-			if args.strip:
-				if re.match('^\s+$', wdstr):
-					i += 1
-					continue
-				while re.match('\s', wdstr[0]):
-					wdstr = wdstr[1:]
-					wdstart += 1
+			if isHanzi(ch):
+				string += ch
+				if caught_hanzi:
+					pass
+				else:
+					begin = curr
+					caught_hanzi = True
+			else:
+				if caught_hanzi:
+					if isReservedWord(inp, curr):
+						_ = inp.find("%>", curr) + 2
+						string += inp[curr:_]
+						curr = _
+						continue
+					caught_hanzi = False
+					end = curr
 
-			# 记录结束字
-			wdend = i;
-			# 输出格式: 开始偏移，结束偏移，字符串
-			r = u'';
-			r += str(wdstart) + ',' + str(wdend) + ',';
-			r += wdstr;
-			r += '\r\n';
-			# 输出
-			fout.write(r);
-	# 记录上一个字符是否为汉字
-	lastWide = isWide;
-	# 下一个字符
-	i += 1;
+					# print (begin, end, string)
+					entries.append(TransEntry(begin, end, string))
+					string = ""
+			curr += 1
+
+		curr = 0
+		for e in entries:
+			assert(curr < e.begin)
+			assert(e.begin < e.end)
+			assert(inp[e.begin:e.end] == e.string)
+			curr = e.end
+			# print (e.begin, e.end, e.string)
+
+	with open(args.output, "w", encoding='utf-8') as fo:
+		csv_writer = csv.writer(fo)
+		for e in entries:
+			csv_writer.writerow([e.begin, e.end, e.string])
+	print ("{}: {} entries exported. {} CJK charactors found.".format(args.output, len(entries), cjk))
+
+if __name__ == "__main__":
+	main()
