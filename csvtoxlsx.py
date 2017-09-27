@@ -8,10 +8,10 @@ import unicodecsv as csv
 
 def csv_to_execl(csvfiles):
     cnt = 1
-    workbook = xlwt.Workbook()
+    workbook = xlwt.Workbook(encoding="UTF-8")
 
     for csvfile in csvfiles:
-        sheet = workbook.add_sheet('Sheet %d' % (cnt))
+        sheet = workbook.add_sheet(os.path.splitext(csvfile)[0])
         cnt += 1
         with open(csvfile, "rb") as f:
             reader = csv.reader(f, delimiter=',')
