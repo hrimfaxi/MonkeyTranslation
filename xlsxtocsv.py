@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 # coding: utf-8
 
 import xlrd, os, sys, codecs
@@ -10,13 +10,18 @@ def csv_from_execl(xlsxfn):
     wb = xlrd.open_workbook(xlsxfn)
     for sh in wb.sheets():
         print(sh.name)
-        title = xlsxfn.decode('utf-8')
-        title = title[0:title.rfind(".xlsx")]
+        title = xlsxfn
+        for pos in [ title.rfind(".xlsx"), title.rfind(".xls") ]:
+            if pos != -1:
+                title = title[0:pos]
+                break
+        else:
+            raise RuntimeError("not xlsx or xls")
         ofn = title + u"_" + sh.name + u".csv"
         with open(ofn, "wb") as f:
             wr = csv.writer(f, delimiter=',')
 
-            for rownum in xrange(sh.nrows):
+            for rownum in range(sh.nrows):
                 v = sh.row_values(rownum)
                 if isinstance(v[0], (float, )):
                     v[0] = int(v[0])
