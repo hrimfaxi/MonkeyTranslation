@@ -13,12 +13,12 @@ if len(sys.argv) < 3:
 	sys.exit(1)
 
 # 原文
-fin = codecs.open(sys.argv[1],'r',encoding='utf-8');
+fin = open(sys.argv[1],'r',encoding='utf-8');
 # 翻译列表，格式为开始偏移量，结束偏移，原文，翻译
-fincsv = codecs.open(sys.argv[2], 'r', encoding='utf-8');
+fincsv = open(sys.argv[2], 'r', encoding='utf-8');
 outfile = "out.csv"
 # 输出
-fout = codecs.open(outfile, 'w', encoding='utf-8');
+fout = open(outfile, 'w', encoding='utf-8');
 # 原文的全部内容
 csv = fin.read();
 
