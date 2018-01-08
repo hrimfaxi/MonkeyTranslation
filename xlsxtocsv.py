@@ -23,9 +23,9 @@ def csv_from_execl(xlsxfn):
 
             for rownum in range(sh.nrows):
                 v = sh.row_values(rownum)
-                if isinstance(v[0], (float, )):
+                if len(v)>0 and isinstance(v[0], (float, )):
                     v[0] = int(v[0])
-                if isinstance(v[1], (float, )):
+                if len(v)>1 and isinstance(v[1], (float, )):
                     v[1] = int(v[1])
                 wr.writerow(v)
         print (ofn + u" dumped.")
