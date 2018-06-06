@@ -43,8 +43,8 @@ def main():
 	argparser.add_argument('--unique', '-u', action='store_true')
 	args = argparser.parse_args()
 
-	if args.unique:
-		print ("Unique mode selected")
+#	if args.unique:
+#		print ("Unique mode selected")
 
 	with open(args.input, "r", encoding='utf-8') as fi:
 		inp = fi.read()
