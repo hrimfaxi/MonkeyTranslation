@@ -2,7 +2,7 @@
 
 ```shell
 ./xlsxtocsv.py aaa.xlsx #转化为csv
-find . -iname "*.xlsx" -o -iname "*.xls" -print0 | xargs -I % -0 ../xlsxtocsv.py %
+find . -iname "*.xlsx" -print0 -o -iname "*.xls" -print0 | xargs -I % -0 ../xlsxtocsv.py %
 ```
 
 ## 统计字数
