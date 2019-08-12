@@ -27,6 +27,17 @@ ranges = [
 	{"from": ord(u"\u3040"), "to": ord(u"\u309f")},		# 平假名
 ]
 
+def is_japanese(string):
+	r = [
+		{"from": ord(u"\u3040"), "to": ord(u"\u309f")},     # 平假名
+		{"from": ord(u"\u30a0"), "to": ord(u"\u30ff")},     # Japanese Kana
+	]
+
+	for char in string:
+		if any([range["from"] <= ord(char) <= range["to"] for range in r]):
+			return True
+	return False
+
 # 不包括标点符号
 def isCJK(char):
 	return any([range["from"] <= ord(char) <= range["to"] for range in ranges])
@@ -41,6 +52,7 @@ def main():
 	argparser.add_argument('input')
 	argparser.add_argument('output')
 	argparser.add_argument('--unique', '-u', action='store_true')
+	argparser.add_argument('--only-japanese', '-j', action='store_true')
 	args = argparser.parse_args()
 
 #	if args.unique:
@@ -78,12 +90,23 @@ def main():
 						if string in transDict:
 							pass
 						else:
+							if args.only_japanese:
+								if is_japanese(string):
+									#print (begin, end, string)
+									entries.append(TransEntry(begin, end, string))
+									transDict[string] = True
+							else:
+								#print (begin, end, string)
+								entries.append(TransEntry(begin, end, string))
+								transDict[string] = True
+					else:
+						if args.only_japanese:
+							if is_japanese(string):
+								#print (begin, end, string)
+								entries.append(TransEntry(begin, end, string))
+						else:
 							#print (begin, end, string)
 							entries.append(TransEntry(begin, end, string))
-							transDict[string] = True
-					else:
-						#print (begin, end, string)
-						entries.append(TransEntry(begin, end, string))
 					string = ""
 			curr += 1
 
@@ -106,4 +129,9 @@ def main():
 	print ("{}: {} entries exported. {} CJK charactors found.".format(args.output, len(entries), cjk))
 
 if __name__ == "__main__":
+	assert (is_japanese("test") == False)
+	assert (is_japanese("你好世界") == False)
+	assert (is_japanese("正規表現は非常に役に立つツールテキストを操作することです。") == True)
+	assert (is_japanese("あアいイうウえエおオ") == True)
+	assert (is_japanese("ウ") == True)
 	main()
