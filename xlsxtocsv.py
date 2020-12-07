@@ -4,6 +4,9 @@
 import xlrd, os, sys, codecs
 import unicodecsv as csv
 
+xlrd.xlsx.ensure_elementtree_imported(False, None)
+xlrd.xlsx.Element_has_iter = True
+
 # xlsx 转 csv
 
 def csv_from_execl(xlsxfn):
@@ -27,6 +30,9 @@ def csv_from_execl(xlsxfn):
                     v[0] = int(v[0])
                 if len(v)>1 and isinstance(v[1], (float, )):
                     v[1] = int(v[1])
+                # print (v)
+                #if len(v) > 7:
+                #    v = [ v[7] ]
                 wr.writerow(v)
         print (ofn + u" dumped.")
 
