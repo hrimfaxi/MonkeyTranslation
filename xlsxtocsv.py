@@ -9,8 +9,11 @@ xlrd.xlsx.Element_has_iter = True
 
 # xlsx 转 csv
 
+SHEETNAME_TO_FILENAME = False
+
 def csv_from_execl(xlsxfn):
     wb = xlrd.open_workbook(xlsxfn)
+    first = True
     for sh in wb.sheets():
         print(sh.name)
         title = xlsxfn
@@ -20,8 +23,14 @@ def csv_from_execl(xlsxfn):
                 break
         else:
             raise RuntimeError("not xlsx or xls")
-        ofn = title + u"_" + sh.name + u".csv"
-        with open(ofn, "wb") as f:
+        if SHEETNAME_TO_FILENAME:
+            ofn = title + u"_" + sh.name + u".csv"
+        else:
+            ofn = title + u".csv"
+            if first and os.path.exists(ofn):
+                os.remove(ofn)
+                first = False
+        with open(ofn, "ab") as f:
             wr = csv.writer(f, delimiter=',')
 
             for rownum in range(sh.nrows):
