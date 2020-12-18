@@ -2,4 +2,4 @@
 
 INPUT=$1
 
-grep -o '[0-9]* CJK charactors' $INPUT | sed 's/ CJK.*//g' | awk ' BEGIN {sum = 0} { sum += $1 } END {print sum}'
+grep -o '[0-9]* CJK characters' $INPUT | sed 's/ CJK.*//g' | awk ' BEGIN {sum = 0} { sum += $1 } END {print sum}'

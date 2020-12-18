@@ -126,7 +126,7 @@ def main():
 			for ch in e.string:
 				if isCJK(ch):
 					cjk += 1
-	print ("{}: {} entries exported. {} CJK charactors found.".format(args.output, len(entries), cjk))
+	print ("{}: {} entries exported. {} CJK characters found.".format(args.output, len(entries), cjk))
 
 if __name__ == "__main__":
 	assert (is_japanese("test") == False)
